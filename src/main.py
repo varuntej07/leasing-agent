@@ -1,7 +1,8 @@
 import json
+import logging
+import time
 from dotenv import load_dotenv
 
-from livekit import agents
 from livekit.agents import (
     AgentSession,
     JobContext,
@@ -18,9 +19,13 @@ from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 from src.agents.inbound import InboundLeasingAgent
 from src.agents.outbound import OutboundLeasingAgent
-from src.observability import log_metrics, setup_logging
+from src.observability import bind_session, log_metrics, setup_logging
 
 load_dotenv()
+setup_logging()
+
+logger = logging.getLogger(__name__)
+
 
 def create_session() -> AgentSession:
     # FallbackAdapter tries the primary model first; falls back to secondary on failure
@@ -58,6 +63,9 @@ async def entrypoint(ctx: JobContext) -> None:
     else:
         agent = InboundLeasingAgent()
 
+    # Stamp every log in this call with the room name so the full session is grep-able
+    bind_session(ctx.room.name)
+
     session = create_session()
 
     @session.on("metrics_collected")
@@ -66,13 +74,27 @@ async def entrypoint(ctx: JobContext) -> None:
 
     await ctx.connect()         # joins the LiveKit Room (the call's audio channel)
 
-    await session.start(
-        agent=agent,
-        room=ctx.room,
-        room_input_options=RoomInputOptions(
-            noise_cancellation=noise_cancellation.BVC(),
-        ),
-    )
+    agent_type = type(agent).__name__
+    t0 = time.monotonic()
+    logger.info("call.started", extra={"agent": agent_type})
+
+    try:
+        await session.start(
+            agent=agent,
+            room=ctx.room,
+            room_input_options=RoomInputOptions(
+                noise_cancellation=noise_cancellation.BVC(),
+            ),
+        )
+    finally:
+        logger.info(
+            "call.completed",
+            extra={
+                "agent": agent_type,
+                "duration_s": round(time.monotonic() - t0),
+            },
+        )
+
 
 # cli.run_app() starts a LiveKit Worker which is a long-running process
 # that registers with LiveKit server (URL + API key from .env) and sits idle waiting for jobs to be dispatched.

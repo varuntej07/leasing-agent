@@ -1,0 +1,14 @@
+# secrets
+.env
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# model weights (fetched at runtime via download-files)
+*.onnx
+
+# claude code
+.claude/
