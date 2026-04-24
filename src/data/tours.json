@@ -1,0 +1,68 @@
+[
+  {
+    "appointment_id": "t-001",
+    "property_id": "cascade-heights",
+    "unit_id": "CH-305",
+    "date": "2025-04-25",
+    "time": "10:00",
+    "prospect_name": "Marcus Rivera",
+    "prospect_phone": "+12065550911",
+    "prospect_email": "marcus.r@email.com",
+    "status": "scheduled"
+  },
+  {
+    "appointment_id": "t-002",
+    "property_id": "the-meridian",
+    "unit_id": "MR-202",
+    "date": "2025-04-25",
+    "time": "14:00",
+    "prospect_name": "Priya Nair",
+    "prospect_phone": "+12065550842",
+    "prospect_email": null,
+    "status": "confirmed"
+  },
+  {
+    "appointment_id": "t-003",
+    "property_id": "pineview-commons",
+    "unit_id": "PC-014",
+    "date": "2025-04-26",
+    "time": "11:00",
+    "prospect_name": "Jordan Lee",
+    "prospect_phone": "+12065550377",
+    "prospect_email": "jordan.lee@email.com",
+    "status": "scheduled"
+  },
+  {
+    "appointment_id": "t-004",
+    "property_id": "cascade-heights",
+    "unit_id": "CH-101",
+    "date": "2025-04-28",
+    "time": "13:00",
+    "prospect_name": "Aisha Brooks",
+    "prospect_phone": "+12065550654",
+    "prospect_email": null,
+    "status": "scheduled"
+  },
+  {
+    "appointment_id": "t-005",
+    "property_id": "the-meridian",
+    "unit_id": null,
+    "date": "2025-04-29",
+    "time": "15:30",
+    "prospect_name": "Tom Watanabe",
+    "prospect_phone": "+12065550198",
+    "prospect_email": "tomw@email.com",
+    "status": "cancelled"
+  },
+  {
+    "appointment_id": "apt-42ac9743",
+    "property_id": "the-meridian",
+    "unit_id": null,
+    "date": "2024-04-27",
+    "time": "15:00",
+    "prospect_name": "Warren Cage",
+    "prospect_phone": "2064876265",
+    "prospect_email": null,
+    "status": "scheduled"
+  }
+]

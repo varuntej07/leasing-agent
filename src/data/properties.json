@@ -1,0 +1,44 @@
+{
+  "cascade-heights": {
+    "name": "Cascade Heights",
+    "address": "1420 Bellevue Way NE, Bellevue, WA 98004",
+    "phone": "+14255550101",
+    "office_hours": "Monday–Friday 9am–6pm, Saturday 10am–4pm, Sunday closed",
+    "amenities": "Rooftop terrace, resort-style pool, fitness center, coworking lounge, EV charging stations, package lockers",
+    "pet_policy": "Cats and dogs welcome. Max 2 pets per unit. $500 pet deposit, $50/month pet rent. Breed restrictions apply — no dogs over 75 lbs.",
+    "parking": "Assigned underground garage. $150/month per space. One space included with 2-bed and 3-bed units.",
+    "lease_terms": "12-month leases standard. 6-month available at a 10% premium. Month-to-month after initial term at $200/month premium.",
+    "utilities": "Water and trash included. Residents pay electricity and internet separately.",
+    "move_in_costs": "First month's rent, last month's rent, and a $500 security deposit due at signing.",
+    "application_process": "Online application at cascadeheights.com. $50 application fee. Background and credit check required. Typically 2 business days to process.",
+    "neighborhood": "Walking distance to Bellevue Square, Lincoln Square, and Meydenbauer Bay Park. 5-minute drive to I-405 and SR-520."
+  },
+  "the-meridian": {
+    "name": "The Meridian",
+    "address": "8820 159th Ave NE, Redmond, WA 98052",
+    "phone": "+14255550202",
+    "office_hours": "Monday–Friday 9am–5pm, Saturday 10am–3pm, Sunday closed",
+    "amenities": "Fitness center, bike storage, courtyard with BBQ grills, Amazon Hub locker, on-site laundry",
+    "pet_policy": "Cats and small dogs (under 40 lbs) welcome. Max 1 pet per unit. $350 pet deposit, $35/month pet rent.",
+    "parking": "Surface lot. First space free with lease. Additional spaces $75/month.",
+    "lease_terms": "12-month leases only. Month-to-month available after initial term at $150/month premium.",
+    "utilities": "Water and trash included. Residents pay electricity and internet.",
+    "move_in_costs": "First month's rent and $400 security deposit due at signing. Last month optional.",
+    "application_process": "Online application at themeridianredmond.com. $40 application fee. Credit and background check. Typically 1–2 business days.",
+    "neighborhood": "Walking distance to the Overlake Transit Center (Link Light Rail). Close to Microsoft campus, Whole Foods, and Marymoor Park."
+  },
+  "pineview-commons": {
+    "name": "Pineview Commons",
+    "address": "11200 NE 124th St, Kirkland, WA 98034",
+    "phone": "+14255550303",
+    "office_hours": "Monday–Friday 9am–5pm, Saturday by appointment only, Sunday closed",
+    "amenities": "Playground, picnic area, on-site laundry, ample surface parking",
+    "pet_policy": "No pets allowed.",
+    "parking": "Free street parking and unassigned surface lot.",
+    "lease_terms": "12-month leases standard. No short-term options currently available.",
+    "utilities": "Water and trash included. Residents pay electricity and internet.",
+    "move_in_costs": "First month's rent and $300 security deposit due at signing.",
+    "application_process": "Paper or online application available. $30 application fee. Background check required. Processing takes 2–3 business days.",
+    "neighborhood": "Quiet residential neighborhood near Juanita Bay Park and Lake Washington. 10-minute drive to downtown Kirkland. Bus routes 224 and 255 nearby."
+  }
+}

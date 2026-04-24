@@ -1,0 +1,4 @@
+livekit-agents[openai,deepgram,cartesia,silero,turn-detector]>=1.2.15
+livekit-plugins-noise-cancellation~=0.2
+python-dotenv>=1.0.0
+python-json-logger>=3.0.0

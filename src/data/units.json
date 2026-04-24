@@ -1,0 +1,90 @@
+[
+  {
+    "unit_id": "CH-101",
+    "property_id": "cascade-heights",
+    "type": "1bed",
+    "rent": 2850,
+    "sqft": 720,
+    "floor": 1,
+    "available": true,
+    "available_date": "2025-05-01",
+    "floor_plan_url": "https://cascadeheights.com/floorplans/1bed-a"
+  },
+  {
+    "unit_id": "CH-305",
+    "property_id": "cascade-heights",
+    "type": "2bed",
+    "rent": 3750,
+    "sqft": 1050,
+    "floor": 3,
+    "available": true,
+    "available_date": "2025-05-15",
+    "floor_plan_url": "https://cascadeheights.com/floorplans/2bed-b"
+  },
+  {
+    "unit_id": "CH-410",
+    "property_id": "cascade-heights",
+    "type": "studio",
+    "rent": 2100,
+    "sqft": 490,
+    "floor": 4,
+    "available": false,
+    "available_date": null,
+    "floor_plan_url": "https://cascadeheights.com/floorplans/studio-a"
+  },
+  {
+    "unit_id": "MR-202",
+    "property_id": "the-meridian",
+    "type": "1bed",
+    "rent": 1950,
+    "sqft": 680,
+    "floor": 2,
+    "available": true,
+    "available_date": "2025-04-15",
+    "floor_plan_url": "https://themeridianredmond.com/floorplans/1bed"
+  },
+  {
+    "unit_id": "MR-315",
+    "property_id": "the-meridian",
+    "type": "2bed",
+    "rent": 2600,
+    "sqft": 980,
+    "floor": 3,
+    "available": false,
+    "available_date": null,
+    "floor_plan_url": "https://themeridianredmond.com/floorplans/2bed"
+  },
+  {
+    "unit_id": "PC-008",
+    "property_id": "pineview-commons",
+    "type": "1bed",
+    "rent": 1450,
+    "sqft": 620,
+    "floor": 1,
+    "available": true,
+    "available_date": "2025-05-01",
+    "floor_plan_url": "https://pineviewcommons.com/floorplans/1bed"
+  },
+  {
+    "unit_id": "PC-014",
+    "property_id": "pineview-commons",
+    "type": "2bed",
+    "rent": 1850,
+    "sqft": 890,
+    "floor": 1,
+    "available": true,
+    "available_date": "2025-04-20",
+    "floor_plan_url": "https://pineviewcommons.com/floorplans/2bed"
+  },
+  {
+    "unit_id": "PC-021",
+    "property_id": "pineview-commons",
+    "type": "3bed",
+    "rent": 2200,
+    "sqft": 1100,
+    "floor": 2,
+    "available": false,
+    "available_date": null,
+    "floor_plan_url": "https://pineviewcommons.com/floorplans/3bed"
+  }
+]
