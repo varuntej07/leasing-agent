@@ -1,3 +1,9 @@
+import logging
+from src.observability import tool_span
+
+logger = logging.getLogger(__name__)
+
+
 async def transfer_to_human(reason: str, summary: str) -> dict:
     """
     Escalate the current call to a human leasing agent.
@@ -10,9 +16,9 @@ async def transfer_to_human(reason: str, summary: str) -> dict:
     # TODO: emit a LiveKit data message or room event so the human agent UI
     #       is notified and can join the room (SIP transfer or room bridge).
     # TODO: log the transfer with reason + summary for the human agent's context panel.
-
-    return {
-        "transferred": True,
-        "reason": reason,
-        "message": "I'm connecting you with a leasing agent now. Please hold on for a moment."
-    }
+    async with tool_span(logger, "transfer_to_human", reason=reason, summary=summary):
+        return {
+            "transferred": True,
+            "reason": reason,
+            "message": "I'm connecting you with a leasing agent now. Please hold on for a moment.",
+        }

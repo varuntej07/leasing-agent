@@ -12,13 +12,21 @@ _DATA = Path(__file__).parent.parent / "data"
 _TOURS = _DATA / "tours.json"
 
 
-def _load_tours() -> list[dict]:
-    with open(_TOURS) as f:
-        return json.load(f)
+async def _load_tours() -> list[dict]:
+    def _read():
+        with open(_TOURS) as f:
+            return json.load(f)
+    return await asyncio.to_thread(_read)
 
 
-def _save_tours(tours: list[dict]) -> None:
-    _TOURS.write_text(json.dumps(tours, indent=2))
+async def _save_tours(tours: list[dict]) -> None:
+    # Write to a temp file then atomically replace to avoid corrupt JSON on crash
+    payload = json.dumps(tours, indent=2)
+    def _write():
+        tmp = _TOURS.with_suffix(".tmp")
+        tmp.write_text(payload)
+        tmp.replace(_TOURS)
+    await asyncio.to_thread(_write)
 
 
 def _has_conflict(tours: list[dict], property_id: str, date: str, time: str, exclude_id: str = "") -> bool:
@@ -61,7 +69,7 @@ async def schedule_tour(
             time=time,
         ):
             async with asyncio.timeout(3.0):
-                tours = _load_tours()
+                tours = await _load_tours()
 
                 if _has_conflict(tours, property_id, date, time):
                     return {
@@ -81,7 +89,7 @@ async def schedule_tour(
                     "prospect_email": caller_email,
                     "status": "scheduled",
                 })
-                _save_tours(tours)
+                await _save_tours(tours)
 
             return {
                 "success": True,
@@ -94,99 +102,5 @@ async def schedule_tour(
 
     except asyncio.TimeoutError:
         return {"success": False, "error": "scheduling request timed out"}
-    except Exception as exc:
-        return {"success": False, "error": str(exc)}
-
-
-async def confirm_appointment(appointment_id: str, status: str) -> dict:
-    """
-    Update the status of an existing appointment to "confirmed" or "cancelled".
-
-    Returns a dict with keys:
-        success: True if the appointment was found and updated
-        appointment_id: echoed back
-        status: the new status
-        message: human-readable result to read to the caller
-    """
-    try:
-        async with tool_span(logger, "confirm_appointment", appointment_id=appointment_id, status=status):
-            if status not in ("confirmed", "cancelled"):
-                return {"success": False, "error": f"invalid status '{status}'; must be 'confirmed' or 'cancelled'"}
-
-            async with asyncio.timeout(3.0):
-                tours = _load_tours()
-                appt = next((t for t in tours if t["appointment_id"] == appointment_id), None)
-
-                if appt is None:
-                    return {"success": False, "error": f"appointment '{appointment_id}' not found"}
-
-                appt["status"] = status
-                _save_tours(tours)
-
-            action = "confirmed" if status == "confirmed" else "cancelled"
-            return {
-                "success": True,
-                "appointment_id": appointment_id,
-                "status": status,
-                "message": f"Your appointment has been {action}.",
-            }
-
-    except asyncio.TimeoutError:
-        return {"success": False, "error": "confirmation request timed out"}
-    except Exception as exc:
-        return {"success": False, "error": str(exc)}
-
-
-async def reschedule_appointment(
-    appointment_id: str,
-    new_date: str,
-    new_time: str,
-) -> dict:
-    """
-    Move an existing appointment to a new date and time.
-    Checks for conflicts at the new slot before updating.
-
-    Returns a dict with keys:
-        success: True if the appointment was moved
-        appointment_id: echoed back
-        new_date: confirmed new date
-        new_time: confirmed new time
-        message: human-readable result to read to the caller
-    """
-    try:
-        async with tool_span(
-            logger,
-            "reschedule_appointment",
-            appointment_id=appointment_id,
-            new_date=new_date,
-            new_time=new_time,
-        ):
-            async with asyncio.timeout(3.0):
-                tours = _load_tours()
-                appt = next((t for t in tours if t["appointment_id"] == appointment_id), None)
-
-                if appt is None:
-                    return {"success": False, "error": f"appointment '{appointment_id}' not found"}
-
-                if _has_conflict(tours, appt["property_id"], new_date, new_time, exclude_id=appointment_id):
-                    return {
-                        "success": False,
-                        "message": f"That new slot is already taken. Please choose a different date or time.",
-                    }
-
-                appt["date"] = new_date
-                appt["time"] = new_time
-                _save_tours(tours)
-
-            return {
-                "success": True,
-                "appointment_id": appointment_id,
-                "new_date": new_date,
-                "new_time": new_time,
-                "message": f"Your tour has been moved to {new_date} at {new_time}.",
-            }
-
-    except asyncio.TimeoutError:
-        return {"success": False, "error": "reschedule request timed out"}
     except Exception as exc:
         return {"success": False, "error": str(exc)}

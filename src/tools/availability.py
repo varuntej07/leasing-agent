@@ -35,8 +35,18 @@ async def check_availability(
             max_rent=max_rent,
         ):
             async with asyncio.timeout(2.0):
-                with open(_DATA / "units.json") as f:
-                    units: list[dict] = json.load(f)
+                def _read():
+                    with open(_DATA / "units.json") as f:
+                        return json.load(f)
+                units: list[dict] = await asyncio.to_thread(_read)
+
+            known_properties = {"cascade-heights", "the-meridian", "pineview-commons"}
+            if property_id not in known_properties:
+                return {
+                    "error": f"property '{property_id}' not found",
+                    "available_units": [],
+                    "count": 0,
+                }
 
             results = [u for u in units if u["property_id"] == property_id]
 

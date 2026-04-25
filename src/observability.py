@@ -57,44 +57,69 @@ async def tool_span(logger: logging.Logger, tool_name: str, **ctx):
         raise
 
 
-def log_metrics(event) -> None:
-    logger = logging.getLogger("livekit.metrics")
-    m = event.metrics
-    kind = type(m).__name__
+def log_turn_latency(eou_delay_ms: int, ttft_ms: int) -> None:
+    # eou_plus_llm_ms is the LLM pipeline cost only; metrics.ttfa captures the full pipeline to first audio
+    logging.getLogger("livekit.metrics").info(
+        "metrics.turn",
+        extra={
+            "eou_delay_ms": eou_delay_ms,
+            "ttft_ms": ttft_ms,
+            "eou_plus_llm_ms": eou_delay_ms + ttft_ms,
+        },
+    )
 
-    if kind == "LLMMetrics":
+
+def log_ttfa(ttfa_ms: float, speech_id: str | None) -> None:
+    # measured from EOU decision timestamp to agent_state_changed("speaking"); spans LLM inference and TTS startup
+    logging.getLogger("livekit.metrics").info(
+        "metrics.ttfa",
+        extra={
+            "ttfa_ms": round(ttfa_ms),
+            "speech_id": speech_id,
+        },
+    )
+
+
+def log_metrics(m) -> None:
+    logger = logging.getLogger("livekit.metrics")
+
+    # m.type is a string literal field on each metrics dataclass; using it avoids accidentally
+    # matching against MetricsCollectedEvent (the wrapper) instead of the inner object
+    if m.type == "llm_metrics":
         logger.info(
             "metrics.llm",
             extra={
-                "ttft_ms": round(m.ttft * 1000) if getattr(m, "ttft", None) else None,
-                "input_tokens": getattr(m, "prompt_tokens", None),
-                "output_tokens": getattr(m, "completion_tokens", None),
-                "tokens_per_second": getattr(m, "tokens_per_second", None),
-                "model": getattr(m, "label", None),
+                "ttft_ms": round(m.ttft * 1000),
+                "input_tokens": m.prompt_tokens,
+                "cached_tokens": m.prompt_cached_tokens,
+                "output_tokens": m.completion_tokens,
+                "tokens_per_second": round(m.tokens_per_second, 1),
+                "model": m.label,
             },
         )
-    elif kind == "TTSMetrics":
+    elif m.type == "tts_metrics":
         logger.info(
             "metrics.tts",
             extra={
-                "audio_duration_ms": round(m.audio_duration * 1000) if getattr(m, "audio_duration", None) else None,
-                "characters": getattr(m, "characters_count", None),
-                "model": getattr(m, "label", None),
+                "ttfb_ms": round(m.ttfb * 1000),
+                "audio_duration_ms": round(m.audio_duration * 1000),
+                "characters": m.characters_count,
+                "model": m.label,
             },
         )
-    elif kind == "STTMetrics":
+    elif m.type == "stt_metrics":
         logger.info(
             "metrics.stt",
             extra={
-                "audio_duration_ms": round(m.audio_duration * 1000) if getattr(m, "audio_duration", None) else None,
-                "model": getattr(m, "label", None),
+                "audio_duration_ms": round(m.audio_duration * 1000),
+                "model": m.label,
             },
         )
-    elif kind == "EOUMetrics":
+    elif m.type == "eou_metrics":
         logger.info(
             "metrics.eou",
             extra={
-                "eou_delay_ms": round(m.end_of_utterance_delay * 1000) if getattr(m, "end_of_utterance_delay", None) else None,
-                "transcription_delay_ms": round(m.transcription_delay * 1000) if getattr(m, "transcription_delay", None) else None,
+                "eou_delay_ms": round(m.end_of_utterance_delay * 1000),
+                "transcription_delay_ms": round(m.transcription_delay * 1000),
             },
         )

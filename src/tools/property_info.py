@@ -20,12 +20,15 @@ async def get_property_info(property_id: str, category: str) -> dict:
         property_id: echoed back
         category: echoed back
         info: the requested information as a string or nested dict
+    Call this before answering any questions about the property features or policies.
     """
     try:
         async with tool_span(logger, "get_property_info", property_id=property_id, category=category):
             async with asyncio.timeout(2.0):
-                with open(_DATA / "properties.json") as f:
-                    properties: dict = json.load(f)
+                def _read():
+                    with open(_DATA / "properties.json") as f:
+                        return json.load(f)
+                properties: dict = await asyncio.to_thread(_read)       # for file sync operations (avoids main thread from blocking)
 
             if property_id not in properties:
                 return {"error": f"property '{property_id}' not found"}
