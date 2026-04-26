@@ -34,11 +34,24 @@ Managed properties (dummy data for POC):
 
 ```text
 src/
-  agents/         Agent classes and prompts
-  data/           Demo inventory, tours, and maintenance request data
-  tools/          Tool implementations invoked by the LLM
-  main.py         LiveKit worker entrypoint
-  observability.py Structured logging and metrics helpers
+  agents/
+    base.py           # Shared LeasingAgent with transfer_to_human tool
+    inbound.py        # InboundLeasingAgent with leasing and maintenance tools
+    prompts.py        # System prompt templates
+  data/
+    units.json               # Apartment unit inventory
+    properties.json          # Property details and FAQs
+    tours.json               # Scheduled tour records
+    maintenance_requests.json   # Submitted maintenance requests
+  tools/
+    availability.py   # check_availability implementation
+    scheduling.py     # schedule_tour implementation
+    property_info.py  # get_property_info implementation
+    maintenance.py    # submit_maintenance_request implementation
+    transfer.py       # transfer_to_human implementation
+  main.py             # LiveKit worker entrypoint
+  session.py          # Session context and per-call state
+  observability.py    # Structured logging and metrics helpers
 scripts/
   setup_dispatch_rule.py
 ```
@@ -76,9 +89,7 @@ Start the worker:
 python -m src.main dev
 ```
 
-Test without a phone number using LiveKit Agents Playground:
-
-https://agents-playground.livekit.io/
+Test without a phone number using LiveKit Agents Playground: https://agents-playground.livekit.io/
 
 You can also connect the worker to SIP and call it through your configured phone number.
 
@@ -114,18 +125,19 @@ python -m src.main dev | Select-String "metrics.llm|call.usage.llm|call.usage.tt
 
 This repo is instrumented to support practical voice-agent evaluation:
 
-- Task completion: successful tour bookings, maintenance submissions, and transfers
-- Behavioral compliance: whether the agent follows tool-use and prompt rules
+- Task completion: successful tour bookings, maintenance submissions, and property information lookups.
+- Behavioral compliance: whether the agent follows tool use and prompt rules
 - Latency: turn-level timing and end-to-end responsiveness
 - STT quality: correctness on property names, unit IDs, and phone numbers
 
-The current implementation is designed as a take-home project with local data files rather than a production deployment.
+The current implementation is designed as a take-home project (POC) with local data files rather than a production deployment.
 
 ## Notes
 
 - `@function_tool` docstrings matter. LiveKit turns them into tool descriptions shown to the model.
 - The worker is inbound-only.
 - Persistence is file-backed and intended for demonstration, not multi-worker production use.
+- I tested the agent (after running the script) by calling 2042122069, a phone number I purchased through LiveKit.
 
 ## Context
 
