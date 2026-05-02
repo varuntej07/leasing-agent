@@ -8,6 +8,8 @@ from contextvars import ContextVar
 
 from pythonjsonlogger.json import JsonFormatter as _JsonFormatter
 
+# The goal is: every log line emitted anywhere in a call should automatically carry the room name it belongs to 
+# without passing it through every function signature. That's implicit context propagation.
 _session_id: ContextVar[str] = ContextVar("session_id", default="")
 
 
@@ -35,15 +37,23 @@ def setup_logging() -> None:
     root.addHandler(handler)
     root.setLevel(level)
 
+# asynccontextmanager is an object designed to manage the setup and cleanup of resources
+# The decorator lets you write a generator function instead.
+# The rule is simple: everything before yield is __aenter__, everything after is __aexit__
 
 @asynccontextmanager
 async def tool_span(logger: logging.Logger, tool_name: str, **ctx):
+    """
+    The tool_span context manager gives me per-event structured logs with duration, but alerting needs a metrics backend.
+    A statsd/Prometheus histogram emit inside tool_span — same place, same timing code, and then 
+    configure P95 threshold alerts in Datadog. The logs stay for debugging and the metrics drive alerts.
+    """
     t0 = time.perf_counter()
-    logger.info("tool.called", extra={"tool": tool_name, **ctx})
+    logger.info("tool.called", extra={"tool": tool_name, **ctx})   # __aenter__ body starts here
     try:
-        yield
+        yield                   # actual tool call happens here: hands control to 'async with' block
         elapsed = round((time.perf_counter() - t0) * 1000)
-        logger.info("tool.ok", extra={"tool": tool_name, "duration_ms": elapsed, **ctx})
+        logger.info("tool.ok", extra={"tool": tool_name, "duration_ms": elapsed, **ctx})     # __aexit__ happy path
     except asyncio.TimeoutError:
         elapsed = round((time.perf_counter() - t0) * 1000)
         logger.error("tool.timeout", extra={"tool": tool_name, "duration_ms": elapsed, **ctx})

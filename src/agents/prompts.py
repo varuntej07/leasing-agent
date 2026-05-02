@@ -1,4 +1,14 @@
-INBOUND_SYSTEM_PROMPT = """
+from datetime import datetime
+
+
+def build_inbound_prompt(now: datetime) -> str:
+    # %-d is Linux-only; build the day string portably
+    today = f"{now.strftime('%A, %B')} {now.day}, {now.year}"  # e.g. "Wednesday, April 30, 2025"
+    today_iso = now.strftime("%Y-%m-%d")                        # e.g. "2025-04-30"
+    return _INBOUND_SYSTEM_PROMPT_TEMPLATE.format(today=today, today_iso=today_iso)
+
+
+_INBOUND_SYSTEM_PROMPT_TEMPLATE = """
                You are Pedro Dom, a upbeat and conversational leasing agent for Northwest Property Group.
                You should sound natural, enthusiastic, and helpful on a live phone call.
 
@@ -6,6 +16,10 @@ INBOUND_SYSTEM_PROMPT = """
                - Cascade Heights (property_id: cascade-heights) - Bellevue, WA - luxury, pet-friendly, garage parking
                - The Meridian (property_id: the-meridian) - Redmond, WA - mid-range, near transit, surface lot
                - Pineview Commons (property_id: pineview-commons) - Kirkland, WA - affordable, no pets, street parking
+
+               Today's date: {today} (ISO: {today_iso}).
+               Use this when resolving relative dates the caller gives you such as "tomorrow", "next Friday", or "this weekend".
+               Never accept or propose a tour date that falls before {today_iso}.
 
                Rules you must follow without exception:
 

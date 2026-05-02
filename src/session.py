@@ -40,7 +40,10 @@ class SessionHandler:
     async def _force_end_call(self, closing_line: str, reason: str) -> None:
         logger.info("call.fast_end.requested", extra={"reason": reason, "transcript_matched": True})
         try:
+            # when add_to_chat_ctx is True, the agent's own words are added as an assistant message,
+            # so the llm sees them in subsequent turns
             handle = self._session.say(closing_line, allow_interruptions=False, add_to_chat_ctx=True)
+            
             await handle.wait_for_playout()
         except Exception:
             logger.exception("call.fast_end.playout_failed", extra={"reason": reason})
@@ -101,34 +104,54 @@ class SessionHandler:
 
     def flush_usage(self) -> None:
         """Log per-provider usage summaries. Call once at the end of each session."""
-        for entry in self._session.usage.model_usage:
-            if entry.type == "llm_usage":
-                logger.info(
-                    "call.usage.llm",
-                    extra={
-                        "provider": entry.provider,
-                        "model": entry.model,
-                        "input_tokens": entry.input_tokens,
-                        "cached_tokens": entry.input_cached_tokens,
-                        "output_tokens": entry.output_tokens,
-                    },
-                )
-            elif entry.type == "tts_usage":
-                logger.info(
-                    "call.usage.tts",
-                    extra={
-                        "provider": entry.provider,
-                        "model": entry.model,
-                        "characters": entry.characters_count,
-                        "audio_duration_s": round(entry.audio_duration, 2),
-                    },
-                )
-            elif entry.type == "stt_usage":
-                logger.info(
-                    "call.usage.stt",
-                    extra={
-                        "provider": entry.provider,
-                        "model": entry.model,
-                        "audio_duration_s": round(entry.audio_duration, 2),
-                    },
-                )
+        try:
+            entries = self._session.usage.model_usage
+        except Exception:
+            logger.exception("call.usage.unavailable")
+            return
+
+        for entry in entries:
+            try:
+                if entry.type == "llm_usage":
+                    logger.info(
+                        "call.usage.llm",
+                        extra={
+                            "provider": entry.provider,
+                            "model": entry.model,
+                            "input_tokens": entry.input_tokens,
+                            "cached_tokens": entry.input_cached_tokens,
+                            "output_tokens": entry.output_tokens,
+                        },
+                    )
+                elif entry.type == "tts_usage":
+                    logger.info(
+                        "call.usage.tts",
+                        extra={
+                            "provider": entry.provider,
+                            "model": entry.model,
+                            "characters": entry.characters_count,
+                            "audio_duration_s": round(entry.audio_duration, 2),
+                        },
+                    )
+                elif entry.type == "stt_usage":
+                    logger.info(
+                        "call.usage.stt",
+                        extra={
+                            "provider": entry.provider,
+                            "model": entry.model,
+                            "audio_duration_s": round(entry.audio_duration, 2),
+                        },
+                    )
+                elif entry.type == "interruption_usage":
+                    logger.info(
+                        "call.usage.interruption",
+                        extra={
+                            "provider": entry.provider,
+                            "model": entry.model,
+                            "total_requests": entry.total_requests,
+                        },
+                    )
+                else:
+                    logger.warning("call.usage.unknown_type", extra={"type": entry.type})
+            except Exception:
+                logger.exception("call.usage.entry_failed", extra={"type": getattr(entry, "type", "unknown")})

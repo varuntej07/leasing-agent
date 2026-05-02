@@ -35,8 +35,10 @@ def prewarm(process: JobProcess) -> None:
     logging.getLogger(__name__).info("prewarm complete, models loaded")
 
 
+# returns AgentSession object which is the LiveKit Agents runtime
 def create_session(vad: silero.VAD) -> AgentSession:
-    # FallbackAdapter tries the primary model first; falls back to secondary on failure
+    # AgentSession is the LiveKit Agents runtime that glues together media streams,
+    # speech/LLM components, and tool orchestration into a single real-time voice agent.
     return AgentSession(
         stt=stt.FallbackAdapter(
             [
@@ -75,7 +77,10 @@ def create_session(vad: silero.VAD) -> AgentSession:
     )
 
 
+# when an inbound call is received, 
+# LiveKit server dispatches a job to this worker with context of the room
 async def entrypoint(ctx: JobContext) -> None:
+    # instantiate inbound leasing agent (per-call, so there's no shared state between calls)
     agent = InboundLeasingAgent()
 
     # stamps every log in this call with the room name so the full session is greppable
@@ -117,7 +122,10 @@ async def entrypoint(ctx: JobContext) -> None:
                 "duration_s": round(time.monotonic() - t0),
             },
         )
-        handler.flush_usage()
+        try:
+            handler.flush_usage()
+        except Exception:
+            logger.exception("call.usage.flush_failed")
 
 
 # cli.run_app() starts a LiveKit Worker which is a long-running process

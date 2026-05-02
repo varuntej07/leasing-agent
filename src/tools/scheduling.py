@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from datetime import date as _date
 from pathlib import Path
 from typing import Optional
 from uuid import uuid4
@@ -69,6 +70,12 @@ async def schedule_tour(
             time=time,
         ):
             async with asyncio.timeout(3.0):
+                if _date.fromisoformat(date) < _date.today():
+                    return {
+                        "success": False,
+                        "message": "That date is in the past. Please choose a future date for the tour.",
+                    }
+
                 tours = await _load_tours()
 
                 if _has_conflict(tours, property_id, date, time):

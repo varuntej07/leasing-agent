@@ -1,9 +1,10 @@
+from datetime import datetime
 from typing import Optional
 
 from livekit.agents import function_tool
 
 from src.agents.base import LeasingAgent
-from src.agents.prompts import INBOUND_SYSTEM_PROMPT
+from src.agents.prompts import build_inbound_prompt
 from src.tools.availability import check_availability
 from src.tools.maintenance import submit_maintenance_request as _submit_maintenance_request
 from src.tools.property_info import get_property_info
@@ -11,8 +12,10 @@ from src.tools.scheduling import schedule_tour
 
 
 class InboundLeasingAgent(LeasingAgent):
+    # inherits base tools automatically from LeasingAgent,
+    # also adding more tools specific to inbound leasing calls
     def __init__(self) -> None:
-        super().__init__(instructions=INBOUND_SYSTEM_PROMPT)
+        super().__init__(instructions=build_inbound_prompt(datetime.now()))
 
     @function_tool
     async def check_availability(
@@ -84,6 +87,7 @@ class InboundLeasingAgent(LeasingAgent):
         description: str,        # what the caller described in their own words
         urgency: str,            # "emergency" | "urgent" | "routine"
     ) -> dict:
+    
         """
         Submit a maintenance or repair request for a residential unit.
         Collect all fields from the caller before calling this tool.

@@ -7,6 +7,7 @@ from src.tools.transfer import transfer_to_human as _transfer_to_human
 # shared base for all leasing agent types so common tools live in one place
 class LeasingAgent(Agent):
     def __init__(self, instructions: str) -> None:
+        # I dont own EndCallTool, it is provided by livekit and registered via constructor
         end_call_tool = EndCallTool(
             extra_description=(
                 "Use this when the conversation is complete, when the caller clearly says goodbye, "
@@ -18,6 +19,9 @@ class LeasingAgent(Agent):
                 "Do not ask any new follow-up question."
             ),
         )
+
+        # super() is LiveKit's Agent class, so instructions becomes the system prompt 
+        # that the LLM sees at the start of every conversation
         super().__init__(instructions=instructions, tools=end_call_tool.tools)
 
     @function_tool
